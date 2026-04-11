@@ -1,0 +1,140 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {uid}
+// Fields:
+//   - uid: string (required) - Firebase Auth UID
+//   - email: string (required) - User email
+//   - role: string (required, enum: ['fighter', 'coach']) - User role
+//   - name: string (optional) - Display name
+//   - language: string (optional, enum: ['en', 'jp']) - Preferred language
+//
+// Collection: entries
+// Document ID: {entryId}
+// Fields:
+//   - uid: string (required) - User UID
+//   - date: string (required, format: YYYY-MM-DD) - Date of entry
+//   - morningWeight: number (optional) - Weight in kg (morning)
+//   - eveningWeight: number (optional) - Weight in kg (evening)
+//   - caloriesText: string (optional) - User's description of food intake
+//   - estimatedCalories: number (optional) - AI estimated calorie count
+//   - timestamp: timestamp (required) - Creation timestamp
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['coach', 'master_coach'] ||
+        (request.auth.token.email == "pmtchakanyuka@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role', 'name', 'language']) &&
+             data.uid is string &&
+             data.email is string &&
+             data.role in ['fighter', 'coach', 'master_coach'] &&
+             data.name is string &&
+             data.language in ['en', 'jp'] &&
+             (!('maintenanceCalories' in data) || data.maintenanceCalories is number) &&
+             (!('targetWeight' in data) || data.targetWeight is number) &&
+             (!('startingWeight' in data) || data.startingWeight is number) &&
+             (!('saltCutEstimate' in data) || data.saltCutEstimate is number) &&
+             (!('waterCutEstimate' in data) || data.waterCutEstimate is number) &&
+             (!('avatarUrl' in data) || data.avatarUrl is string) &&
+             (!('onboardingCompleted' in data) || data.onboardingCompleted is bool) &&
+             (!('hasConsented' in data) || data.hasConsented is bool) &&
+             (!('currentCampId' in data) || data.currentCampId is string) &&
+             (!('fighterType' in data) || data.fighterType in ['professional', 'amateur', 'dojo_member']) &&
+             (!('sports' in data) || data.sports is list) &&
+             (!('weightUnit' in data) || data.weightUnit in ['kg', 'lbs']) &&
+             (!('guidanceOptOuts' in data) || data.guidanceOptOuts is map);
+    }
+
+    function isValidEntry(data) {
+      return data.keys().hasAll(['uid', 'date', 'timestamp']) &&
+             data.uid is string &&
+             data.date is string &&
+             data.date.matches("^\\d{4}-\\d{2}-\\d{2}$") &&
+             (!('morningWeight' in data) || data.morningWeight is number) &&
+             (!('eveningWeight' in data) || data.eveningWeight is number) &&
+             (!('estimatedCalories' in data) || data.estimatedCalories is number) &&
+             (!('waterIntake' in data) || data.waterIntake is number) &&
+             (!('caloriesText' in data) || (data.caloriesText is string && data.caloriesText.size() < 2000)) &&
+             (!('campId' in data) || data.campId is string);
+    }
+
+    function isValidCamp(data) {
+      return data.keys().hasAll(['uid', 'name', 'startDate', 'targetWeight', 'startingWeight', 'isActive']) &&
+             data.uid is string &&
+             data.name is string &&
+             data.startDate is string &&
+             data.startDate.matches("^\\d{4}-\\d{2}-\\d{2}$") &&
+             data.targetWeight is number &&
+             data.startingWeight is number &&
+             data.isActive is bool;
+    }
+
+    function isValidNote(data) {
+      return data.keys().hasAll(['fighterId', 'coachId', 'date', 'title', 'content', 'createdAt']) &&
+             data.fighterId is string &&
+             data.coachId is string &&
+             data.date is string &&
+             data.date.matches("^\\d{4}-\\d{2}-\\d{2}$") &&
+             data.title is string && data.title.size() < 200 &&
+             data.content is string && data.content.size() < 20000 &&
+             (!('coachName' in data) || data.coachName is string) &&
+             (!('sport' in data) || data.sport is string);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidUser(request.resource.data);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin()) && isValidUser(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /entries/{entryId} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || isAdmin()) && isValidEntry(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin()) && isValidEntry(request.resource.data) && request.resource.data.uid == resource.data.uid;
+      allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    match /camps/{campId} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || isAdmin()) && isValidCamp(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin()) && isValidCamp(request.resource.data) && request.resource.data.uid == resource.data.uid;
+      allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    match /session_notes/{noteId} {
+      allow read: if isAuthenticated() && (resource.data.fighterId == request.auth.uid || isAdmin());
+      allow create: if isAdmin() && isValidNote(request.resource.data);
+      allow update: if isAdmin() && isValidNote(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

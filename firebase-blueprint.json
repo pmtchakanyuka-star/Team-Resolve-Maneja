@@ -1,0 +1,91 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information including role and language preference.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "User email" },
+        "role": { "type": "string", "enum": ["fighter", "coach"], "description": "User role" },
+        "name": { "type": "string", "description": "Display name" },
+        "language": { "type": "string", "enum": ["en", "jp"], "description": "Preferred language" },
+        "maintenanceCalories": { "type": "number", "description": "Estimated maintenance calories" },
+        "targetWeight": { "type": "number", "description": "Target weight in kg" },
+        "startingWeight": { "type": "number", "description": "Starting weight in kg" },
+        "saltCutEstimate": { "type": "number", "description": "Estimated salt cut in kg" },
+        "waterCutEstimate": { "type": "number", "description": "Estimated water cut in kg" },
+        "avatarUrl": { "type": "string", "description": "URL to user avatar" },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether onboarding is finished" },
+        "currentCampId": { "type": "string", "description": "ID of the active competition camp" }
+      },
+      "required": ["uid", "email", "role", "name", "language"]
+    },
+    "WeightEntry": {
+      "title": "Weight Entry",
+      "description": "Daily weight and calorie tracking entry.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User UID" },
+        "date": { "type": "string", "format": "date", "description": "Date of entry (YYYY-MM-DD)" },
+        "morningWeight": { "type": "number", "description": "Weight in kg (morning)" },
+        "eveningWeight": { "type": "number", "description": "Weight in kg (evening)" },
+        "caloriesText": { "type": "string", "description": "User's description of food intake" },
+        "estimatedCalories": { "type": "number", "description": "AI estimated calorie count" },
+        "waterIntake": { "type": "number", "description": "Water intake in liters" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "campId": { "type": "string", "description": "ID of the camp this entry belongs to" }
+      },
+      "required": ["uid", "date", "timestamp"]
+    },
+    "Camp": {
+      "title": "Competition Camp",
+      "description": "A specific competition camp for weight tracking.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User UID" },
+        "name": { "type": "string", "description": "Name of the competition" },
+        "startDate": { "type": "string", "format": "date", "description": "Start date of the camp" },
+        "targetWeight": { "type": "number", "description": "Target weight for this competition" },
+        "startingWeight": { "type": "number", "description": "Starting weight for this competition" },
+        "isActive": { "type": "boolean", "description": "Whether this camp is currently active" }
+      },
+      "required": ["uid", "name", "startDate", "targetWeight", "startingWeight", "isActive"]
+    },
+    "SessionNote": {
+      "title": "Session Note",
+      "description": "Notes recorded by a coach for a fighter session.",
+      "type": "object",
+      "properties": {
+        "fighterId": { "type": "string", "description": "UID of the fighter" },
+        "coachId": { "type": "string", "description": "UID of the coach" },
+        "coachName": { "type": "string", "description": "Name of the coach" },
+        "sport": { "type": "string", "description": "Sport category" },
+        "date": { "type": "string", "format": "date", "description": "Date of the session" },
+        "title": { "type": "string", "description": "Title of the note" },
+        "content": { "type": "string", "description": "Rich text content of the note" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["fighterId", "coachId", "date", "title", "content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profile document"
+    },
+    "/entries/{entryId}": {
+      "schema": "WeightEntry",
+      "description": "Weight and calorie entries"
+    },
+    "/camps/{campId}": {
+      "schema": "Camp",
+      "description": "Competition camps"
+    },
+    "/session_notes/{noteId}": {
+      "schema": "SessionNote",
+      "description": "Session notes recorded by coaches"
+    }
+  }
+}

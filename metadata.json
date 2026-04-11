@@ -1,0 +1,5 @@
+{
+  "name": "MMA Weight Tracker",
+  "description": "A bilingual (EN/JP) weight and calorie tracking app for MMA fighters and coaches with AI-powered calorie estimation.",
+  "requestFramePermissions": []
+}
