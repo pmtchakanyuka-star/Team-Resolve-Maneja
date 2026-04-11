@@ -44,8 +44,9 @@ export interface WeightEntry {
   caloriesText?: string;
   estimatedCalories?: number;
   waterIntake?: number;
+  mood?: 1 | 2 | 3 | 4 | 5;
   timestamp: any;
-  userName?: string; // For coach view
+  userName?: string;
   campId?: string;
 }
 

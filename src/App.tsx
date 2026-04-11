@@ -346,6 +346,7 @@ export default function App() {
   const [eveningWeight, setEveningWeight] = useState('');
   const [waterIntake, setWaterIntake] = useState('');
   const [caloriesText, setCaloriesText] = useState('');
+  const [mood, setMood] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
   const [estimatedCalories, setEstimatedCalories] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -385,6 +386,7 @@ export default function App() {
   const [newCampName, setNewCampName] = useState('');
   const [newCampTarget, setNewCampTarget] = useState('');
   const [newCampStartingWeight, setNewCampStartingWeight] = useState('');
+  const [newCampTargetDate, setNewCampTargetDate] = useState('');
 
   const AVATARS = [
     { url: 'https://api.dicebear.com/9.x/avataaars/svg?seed=Felix', name: 'Felix' },
@@ -486,6 +488,7 @@ export default function App() {
         uid: targetUid,
         name: newCampName,
         startDate: new Date().toISOString().split('T')[0],
+        targetDate: newCampTargetDate || undefined,
         targetWeight: parseFloat(newCampTarget),
         startingWeight: parseFloat(newCampStartingWeight),
         isActive: true
@@ -497,6 +500,7 @@ export default function App() {
       setNewCampName('');
       setNewCampTarget('');
       setNewCampStartingWeight('');
+      setNewCampTargetDate('');
       setShowCampModal(false);
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'camps');
@@ -941,6 +945,7 @@ export default function App() {
       waterIntake: waterIntake ? parseFloat(waterIntake) : undefined,
       caloriesText,
       estimatedCalories: estimatedCalories || undefined,
+      mood: mood || undefined,
       timestamp: serverTimestamp(),
       campId: activeCamp?.id
     };
@@ -959,6 +964,7 @@ export default function App() {
       setWaterIntake('');
       setCaloriesText('');
       setEstimatedCalories(null);
+      setMood(null);
       setEditingEntryId(null);
       setOverwriteWarning(null);
       
@@ -1412,8 +1418,8 @@ export default function App() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">{t.startingWeight} (kg)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     step="0.1"
                     value={newCampStartingWeight}
                     onChange={(e) => setNewCampStartingWeight(e.target.value)}
@@ -1421,7 +1427,17 @@ export default function App() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
                 </div>
-                <button 
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Fight / Weigh-in Date</label>
+                  <input
+                    type="date"
+                    value={newCampTargetDate}
+                    onChange={(e) => setNewCampTargetDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Optional — enables the fight countdown</p>
+                </div>
+                <button
                   onClick={startNewCamp}
                   disabled={!newCampName || !newCampTarget || !newCampStartingWeight}
                   className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
@@ -1892,8 +1908,37 @@ export default function App() {
                   </div>
 
                   <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">How do you feel?</label>
+                    <div className="flex justify-between gap-1">
+                      {([
+                        { val: 1, emoji: '😴', label: 'Exhausted' },
+                        { val: 2, emoji: '😟', label: 'Tired' },
+                        { val: 3, emoji: '😐', label: 'Okay' },
+                        { val: 4, emoji: '💪', label: 'Good' },
+                        { val: 5, emoji: '⚡', label: 'Great' },
+                      ] as const).map(({ val, emoji, label }) => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setMood(mood === val ? null : val)}
+                          title={label}
+                          className={cn(
+                            "flex-1 flex flex-col items-center gap-1 py-2 rounded-xl border-2 transition-all text-xl",
+                            mood === val
+                              ? "border-blue-500 bg-blue-50 scale-105 shadow-sm"
+                              : "border-slate-200 bg-slate-50 hover:border-slate-300"
+                          )}
+                        >
+                          <span>{emoji}</span>
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t.caloriesInput}</label>
-                    <textarea 
+                    <textarea
                       value={caloriesText}
                       onChange={(e) => setCaloriesText(e.target.value)}
                       placeholder="e.g. 2 eggs, 1 toast, chicken salad..."
@@ -1970,6 +2015,7 @@ export default function App() {
                   setWaterIntake(entry.waterIntake?.toString() || '');
                   setCaloriesText(entry.caloriesText || '');
                   setEstimatedCalories(entry.estimatedCalories || null);
+                  setMood((entry.mood as 1|2|3|4|5) || null);
                   setEditingEntryId(entry.id || null);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
@@ -2461,6 +2507,31 @@ function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, 
     }));
   }, [campEntries]);
 
+  const streak = useMemo(() => {
+    if (entries.length === 0) return 0;
+    const today = new Date().toISOString().split('T')[0];
+    let count = 0;
+    let checkDate = new Date();
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0];
+      const hasEntry = entries.some(e => e.date === dateStr && (e.morningWeight || e.eveningWeight));
+      if (!hasEntry) {
+        if (dateStr === today) { checkDate.setDate(checkDate.getDate() - 1); continue; }
+        break;
+      }
+      count++;
+      checkDate.setDate(checkDate.getDate() - 1);
+      if (count > 365) break;
+    }
+    return count;
+  }, [entries]);
+
+  const daysToFight = useMemo(() => {
+    if (!activeCamp?.targetDate) return null;
+    const diff = Math.ceil((new Date(activeCamp.targetDate).getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+    return diff;
+  }, [activeCamp]);
+
   const weeklyDeficit = useMemo(() => {
     if (!profile?.maintenanceCalories || entries.length === 0) return null;
     
@@ -2518,10 +2589,17 @@ function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, 
         <>
           {/* Camp Info */}
       {activeCamp && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-blue-600 rounded-3xl p-6 text-white shadow-lg shadow-blue-100"
+          className={cn(
+            "rounded-3xl p-6 text-white shadow-lg",
+            daysToFight !== null && daysToFight <= 7
+              ? "bg-red-600 shadow-red-100"
+              : daysToFight !== null && daysToFight <= 14
+              ? "bg-amber-500 shadow-amber-100"
+              : "bg-blue-600 shadow-blue-100"
+          )}
         >
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -2533,16 +2611,33 @@ function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, 
               <div className="text-xl font-bold">{activeCamp.targetWeight} kg</div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="bg-white/10 rounded-2xl p-3">
               <div className="text-[10px] font-bold uppercase opacity-60 mb-1">Started</div>
-              <div className="font-bold">{activeCamp.startDate}</div>
+              <div className="font-bold text-sm">{activeCamp.startDate}</div>
             </div>
             <div className="bg-white/10 rounded-2xl p-3">
               <div className="text-[10px] font-bold uppercase opacity-60 mb-1">Entries</div>
               <div className="font-bold">{campEntries.length}</div>
             </div>
+            <div className="bg-white/20 rounded-2xl p-3 border border-white/30">
+              <div className="text-[10px] font-bold uppercase opacity-60 mb-1">
+                {daysToFight !== null ? 'Fight Day' : 'Weigh-in'}
+              </div>
+              <div className="font-black text-xl">
+                {daysToFight !== null
+                  ? daysToFight <= 0
+                    ? 'TODAY'
+                    : `${daysToFight}d`
+                  : '--'}
+              </div>
+            </div>
           </div>
+          {daysToFight !== null && daysToFight <= 7 && daysToFight > 0 && (
+            <div className="mt-3 bg-white/20 rounded-xl px-3 py-2 text-sm font-bold text-center animate-pulse">
+              ⚠️ Fight week — {daysToFight} day{daysToFight !== 1 ? 's' : ''} to go
+            </div>
+          )}
         </motion.div>
       )}
       {/* Coach's Planning Card (Editable for Coach, Read-only for Fighter) */}
@@ -2623,6 +2718,27 @@ function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, 
           </div>
         </div>
       </div>
+
+      {/* Streak Banner */}
+      {streak > 0 && (
+        <div className={cn(
+          "flex items-center gap-3 rounded-2xl px-5 py-3 border",
+          streak >= 14 ? "bg-orange-50 border-orange-200" : "bg-amber-50 border-amber-200"
+        )}>
+          <span className="text-2xl">{streak >= 14 ? '🔥' : '⚡'}</span>
+          <div>
+            <p className="font-black text-slate-900 text-lg leading-none">{streak}-day streak</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {streak >= 30 ? 'Incredible consistency!' : streak >= 14 ? 'Keep it up!' : streak >= 7 ? 'Great momentum!' : 'Keep going!'}
+            </p>
+          </div>
+          {streak >= 7 && (
+            <div className="ml-auto bg-white rounded-xl px-3 py-1 border border-amber-200">
+              <span className="text-xs font-bold text-amber-700">{streak >= 30 ? '🏆 Legend' : streak >= 14 ? '🥇 Committed' : '🥊 On fire'}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6">
@@ -2757,7 +2873,7 @@ function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, 
                   )}
                 </div>
               </div>
-              <div className="flex gap-4 text-sm text-slate-500">
+              <div className="flex flex-wrap gap-4 text-sm text-slate-500">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-blue-500" />
                   {t.morning}: <span className="font-semibold text-slate-700">{entry.morningWeight || '--'} kg</span>
@@ -2766,6 +2882,12 @@ function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, 
                   <div className="w-2 h-2 rounded-full bg-red-500" />
                   {t.evening}: <span className="font-semibold text-slate-700">{entry.eveningWeight || '--'} kg</span>
                 </div>
+                {entry.mood && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-base">{['😴','😟','😐','💪','⚡'][entry.mood - 1]}</span>
+                    <span className="text-xs text-slate-400">{['Exhausted','Tired','Okay','Good','Great'][entry.mood - 1]}</span>
+                  </div>
+                )}
               </div>
               {entry.caloriesText && (
                 <p className="mt-2 text-xs text-slate-400 italic line-clamp-1">{entry.caloriesText}</p>

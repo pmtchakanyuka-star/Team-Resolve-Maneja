@@ -168,13 +168,72 @@ export function CoachView({
             <SportBreakdownChart fighters={accessibleFighters} entries={entries} camps={camps} weightUnit={weightUnit} t={t} />
           )}
           
-          <WeightOverviewChart 
-            fighters={accessibleFighters} 
-            entries={entries} 
+          {/* Team Readiness Board */}
+          {accessibleFighters.length > 0 && (
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">Team Readiness</h3>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Today</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                {accessibleFighters.map(fighter => {
+                  const latestEntry = fighterLatestEntries[fighter.uid];
+                  const activeFighterCamp = camps.find(c => c.uid === fighter.uid && c.isActive);
+                  const currentWeightKg = latestEntry?.morningWeight || latestEntry?.eveningWeight || activeFighterCamp?.startingWeight || fighter.startingWeight || 0;
+                  const targetWeightKg = fighter.targetWeight || 0;
+                  const currentWeight = convertWeight(currentWeightKg);
+                  const targetWeight = convertWeight(targetWeightKg);
+
+                  let bg = 'bg-slate-100 border-slate-200';
+                  let dot = 'bg-slate-400';
+                  let status = 'No data';
+
+                  if (latestEntry) {
+                    const daysSince = Math.floor((new Date().getTime() - new Date(latestEntry.date).getTime()) / (1000 * 3600 * 24));
+                    if (daysSince > 2) {
+                      bg = 'bg-red-50 border-red-200'; dot = 'bg-red-400'; status = 'Missing';
+                    } else if (targetWeight > 0) {
+                      const over = ((currentWeight - targetWeight) / targetWeight) * 100;
+                      if (over <= 1) { bg = 'bg-green-50 border-green-200'; dot = 'bg-green-500'; status = 'On track'; }
+                      else if (over <= 3) { bg = 'bg-amber-50 border-amber-200'; dot = 'bg-amber-400'; status = 'Close'; }
+                      else { bg = 'bg-red-50 border-red-200'; dot = 'bg-red-500'; status = 'Over'; }
+                    } else {
+                      bg = 'bg-green-50 border-green-200'; dot = 'bg-green-500'; status = 'On track';
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={fighter.uid}
+                      onClick={() => setSelectedFighterId(fighter.uid)}
+                      className={cn("flex items-center gap-2 p-2 rounded-2xl border transition-all hover:shadow-sm text-left", bg)}
+                    >
+                      <img
+                        src={fighter.avatarUrl || 'https://img.icons8.com/fluency/96/monkey.png'}
+                        alt={fighter.name}
+                        className="w-8 h-8 rounded-full bg-white flex-shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 truncate">{fighter.name}</p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", dot)} />
+                          <p className="text-[10px] text-slate-500 truncate">{status}</p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <WeightOverviewChart
+            fighters={accessibleFighters}
+            entries={entries}
             camps={camps}
-            weightUnit={weightUnit} 
+            weightUnit={weightUnit}
             onStatusClick={setStatusFilter}
-            t={t} 
+            t={t}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
