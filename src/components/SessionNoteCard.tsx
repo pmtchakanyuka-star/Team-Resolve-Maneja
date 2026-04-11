@@ -19,7 +19,7 @@ export function SessionNoteCard({ note, isCoach, onEdit, onDelete, t }: SessionN
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all group animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -39,7 +39,7 @@ export function SessionNoteCard({ note, isCoach, onEdit, onDelete, t }: SessionN
           </div>
           
           {isCoach && (
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => onEdit?.(note)}
                 className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"

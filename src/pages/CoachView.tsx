@@ -228,7 +228,7 @@ export function CoachView({
                     className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all cursor-pointer group"
                     onClick={() => setSelectedFighterId(fighter.uid)}
                   >
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <img src={fighter.avatarUrl || 'https://img.icons8.com/fluency/96/monkey.png'} alt="avatar" className="w-12 h-12 rounded-full bg-slate-100" />
@@ -258,14 +258,14 @@ export function CoachView({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-slate-50 rounded-2xl p-4">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4">
+                        <div className="bg-slate-50 rounded-2xl p-3 sm:p-4">
                           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{t.current || 'Current'}</p>
-                          <p className="text-2xl font-bold text-slate-900">{currentWeight.toFixed(1)} <span className="text-sm font-medium text-slate-500">{weightUnit}</span></p>
+                          <p className="text-xl sm:text-2xl font-bold text-slate-900">{currentWeight.toFixed(1)} <span className="text-sm font-medium text-slate-500">{weightUnit}</span></p>
                         </div>
-                        <div className="bg-slate-50 rounded-2xl p-4">
+                        <div className="bg-slate-50 rounded-2xl p-3 sm:p-4">
                           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{t.target || 'Target'}</p>
-                          <p className="text-2xl font-bold text-slate-900">{targetWeight.toFixed(1)} <span className="text-sm font-medium text-slate-500">{weightUnit}</span></p>
+                          <p className="text-xl sm:text-2xl font-bold text-slate-900">{targetWeight.toFixed(1)} <span className="text-sm font-medium text-slate-500">{weightUnit}</span></p>
                         </div>
                       </div>
 

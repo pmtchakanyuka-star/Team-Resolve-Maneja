@@ -88,7 +88,7 @@ export function ProjectionChart({ entries, camp, targetWeight, weightUnit, t }: 
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-xl font-bold text-slate-900">{t.projectedWeight || 'Projected Weight'}</h3>
         {camp?.targetDate && (
@@ -101,7 +101,7 @@ export function ProjectionChart({ entries, camp, targetWeight, weightUnit, t }: 
       
       <ChartSwitcher options={['Line', 'Area']} selected={chartType} onChange={setChartType} />
       
-      <div className="h-72 mt-4">
+      <div className="h-60 sm:h-72 mt-4">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'Area' ? (
             <AreaChart data={chartData}>

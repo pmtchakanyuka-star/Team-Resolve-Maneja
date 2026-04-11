@@ -75,7 +75,7 @@ export function SessionNoteEditor({
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="p-6 border-b border-slate-100">
+      <div className="p-4 sm:p-6 border-b border-slate-100">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-slate-900">{initialTitle ? t.editNote : t.addNote}</h3>
           <button onClick={onCancel} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
@@ -116,7 +116,7 @@ export function SessionNoteEditor({
         </div>
       </div>
 
-      <div className="bg-slate-50 border-b border-slate-100 p-2 flex flex-wrap items-center gap-1">
+      <div className="bg-slate-50 border-b border-slate-100 p-1.5 sm:p-2 flex flex-wrap items-center gap-0.5 sm:gap-1">
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={cn(
@@ -180,7 +180,7 @@ export function SessionNoteEditor({
           </button>
           
           {showEmojiPicker && (
-            <div className="absolute top-full left-0 mt-2 p-3 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 grid grid-cols-8 gap-1 w-72 animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute top-full left-0 mt-2 p-3 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 grid grid-cols-6 sm:grid-cols-8 gap-1 w-56 sm:w-72 max-w-[calc(100vw-2rem)] animate-in fade-in zoom-in-95 duration-200">
               {EMOJIS.map(emoji => (
                 <button
                   key={emoji}
@@ -195,11 +195,11 @@ export function SessionNoteEditor({
         </div>
       </div>
 
-      <div className="p-6 min-h-[200px] prose prose-slate max-w-none">
+      <div className="p-4 sm:p-6 min-h-[200px] prose prose-slate max-w-none">
         <EditorContent editor={editor} className="outline-none" />
       </div>
 
-      <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+      <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
         <button
           onClick={onCancel}
           className="px-6 py-2.5 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-all"

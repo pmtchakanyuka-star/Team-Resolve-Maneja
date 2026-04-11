@@ -1148,7 +1148,7 @@ export default function App() {
           
           <div className="mb-8">
             <label className="text-lg font-black text-slate-800 block mb-6 text-center tracking-tight">{t.selectAvatar}</label>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4">
               {AVATARS.map((avatar) => (
                 <button
                   key={avatar.url}
@@ -1173,7 +1173,7 @@ export default function App() {
           <div className="mb-6 space-y-2">
             <label className="block text-sm font-bold text-slate-700 text-center">{t.sport || 'Sport'}</label>
             <p className="text-xs text-slate-500 text-center mb-2">Select your sports (Fighters will use the first selected sport).</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {(['mma', 'karate', 'kickboxing', 'jiu_jitsu'] as Sport[]).map(sport => (
                 <label key={sport} className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
                   <input
@@ -1497,11 +1497,11 @@ export default function App() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">{t.targetWeight} (kg)</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       step="0.1"
                       required
                       value={fighterForm.targetWeight}
@@ -1512,8 +1512,8 @@ export default function App() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">{t.startingWeight} (kg)</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       step="0.1"
                       required
                       value={fighterForm.startingWeight}
@@ -1679,7 +1679,7 @@ export default function App() {
 
               <div className="sm:col-span-2 space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t.selectAvatar}</label>
-                <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2 sm:gap-3">
                   {AVATARS.map((avatar) => (
                     <button
                       key={avatar.url}

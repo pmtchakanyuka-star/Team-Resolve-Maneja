@@ -44,11 +44,11 @@ export function CalorieWeightChart({ entries, weightUnit, t }: CalorieWeightChar
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6">
       <h3 className="text-xl font-bold text-slate-900 mb-1">{t.calories || 'Calories'} vs {t.morningWeight || 'Morning Weight'}</h3>
       <p className="text-sm text-slate-500 mb-4">{t.trend || 'Trend'}</p>
-      
-      <div className="h-72 mt-4">
+
+      <div className="h-60 sm:h-72 mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />

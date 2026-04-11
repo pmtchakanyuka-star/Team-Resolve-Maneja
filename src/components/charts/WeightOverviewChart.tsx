@@ -129,13 +129,13 @@ export function WeightOverviewChart({ fighters, entries, camps, weightUnit, onSt
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6">
       <h3 className="text-xl font-bold text-slate-900 mb-1">{t.targetVsCurrent || 'Target vs Current'}</h3>
       <p className="text-sm text-slate-500 mb-4">{t.overallTrend || 'Overall Trend'}</p>
-      
+
       <ChartSwitcher options={['Bar', 'Donut', 'Line']} selected={chartType} onChange={setChartType} />
-      
-      <div className="h-72 mt-4">
+
+      <div className="h-60 sm:h-72 mt-4">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'Bar' ? (
             <BarChart data={fighterData}>
