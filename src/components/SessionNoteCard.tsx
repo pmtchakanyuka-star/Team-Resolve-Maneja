@@ -24,6 +24,7 @@ export function SessionNoteCard({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const formattedDate = new Date(note.date).toLocaleDateString(undefined, {
@@ -43,9 +44,12 @@ export function SessionNoteCard({
   const handleSendReply = async () => {
     if (!replyText.trim() || !onAddReply || sending) return;
     setSending(true);
+    setReplyError(null);
     try {
       await onAddReply(note.id, replyText.trim());
       setReplyText('');
+    } catch {
+      setReplyError(t.replyError || 'Failed to send reply. Please try again.');
     } finally {
       setSending(false);
     }
@@ -184,7 +188,10 @@ export function SessionNoteCard({
             <div className="flex gap-2">
               <textarea
                 value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
+                onChange={(e) => {
+                  setReplyText(e.target.value);
+                  setReplyError(null);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -203,6 +210,10 @@ export function SessionNoteCard({
                 <Send className="w-4 h-4" />
               </button>
             </div>
+
+            {replyError && (
+              <p className="mt-1.5 text-xs text-red-500 font-medium">{replyError}</p>
+            )}
 
           </div>
         )}
