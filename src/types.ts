@@ -50,6 +50,15 @@ export interface WeightEntry {
   campId?: string;
 }
 
+export interface NoteReply {
+  id: string;
+  authorId: string;
+  authorName: string;
+  role: 'coach' | 'fighter';
+  content: string;
+  createdAt: any;
+}
+
 export interface SessionNote {
   id: string;
   fighterId: string;
@@ -61,6 +70,7 @@ export interface SessionNote {
   content: string;
   createdAt: any;
   updatedAt: any;
+  replies?: NoteReply[];
 }
 
 export const TRANSLATIONS = {
@@ -189,6 +199,7 @@ export const TRANSLATIONS = {
     addNote: "Add Note",
     noteTitle: "Session Title",
     saveNote: "Save Note",
+    replyPlaceholder: "Write a reply... (Enter to send)",
     editNote: "Edit Note",
     deleteNote: "Delete Note",
     noNotesYet: "No notes yet",
@@ -342,6 +353,7 @@ export const TRANSLATIONS = {
     addNote: "ノートを追加",
     noteTitle: "セッションタイトル",
     saveNote: "ノートを保存",
+    replyPlaceholder: "返信を入力... (Enterで送信)",
     editNote: "ノートを編集",
     deleteNote: "ノートを削除",
     noNotesYet: "ノートがまだありません",
