@@ -25,6 +25,7 @@ export function SessionNoteCard({
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
+  const [pendingReplies, setPendingReplies] = useState<NoteReply[]>([]);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const formattedDate = new Date(note.date).toLocaleDateString(undefined, {
@@ -45,17 +46,34 @@ export function SessionNoteCard({
     if (!replyText.trim() || !onAddReply || sending) return;
     setSending(true);
     setReplyError(null);
+
+    const optimistic: NoteReply = {
+      id: `pending-${Date.now()}`,
+      authorId: currentUserId || '',
+      authorName: currentUserName || '',
+      role: currentUserRole || 'fighter',
+      content: replyText.trim(),
+      createdAt: Date.now(),
+    };
+    setPendingReplies(prev => [...prev, optimistic]);
+    const sentText = replyText.trim();
+    setReplyText('');
+
     try {
-      await onAddReply(note.id, replyText.trim());
-      setReplyText('');
+      await onAddReply(note.id, sentText);
+      // Firestore snapshot will deliver the real reply; remove the pending one
+      setPendingReplies(prev => prev.filter(r => r.id !== optimistic.id));
     } catch {
+      // Roll back optimistic reply and restore text
+      setPendingReplies(prev => prev.filter(r => r.id !== optimistic.id));
+      setReplyText(sentText);
       setReplyError(t.replyError || 'Failed to send reply. Please try again.');
     } finally {
       setSending(false);
     }
   };
 
-  const replies = note.replies || [];
+  const replies = [...(note.replies || []), ...pendingReplies];
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all group animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -152,7 +170,7 @@ export function SessionNoteCard({
                       })
                     : '';
                   return (
-                    <div key={reply.id} className="group/reply flex gap-3">
+                    <div key={reply.id} className={`group/reply flex gap-3 ${reply.id.startsWith('pending-') ? 'opacity-60' : ''}`}>
                       <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 shrink-0 mt-0.5">
                         <User className="w-3.5 h-3.5" />
                       </div>
