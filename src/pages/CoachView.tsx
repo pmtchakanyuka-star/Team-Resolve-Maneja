@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, RefreshCcw, User as UserIcon, Edit, Trash2, ChevronRight, AlertCircle, Loader2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { UserProfile, WeightEntry, Camp, FighterType, Sport, SessionNote } from '../types';
+import { UserProfile, WeightEntry, Camp, FighterType, Sport, SessionNote, NoteReply } from '../types';
 import { WeightOverviewChart } from '../components/charts/WeightOverviewChart';
 import { SportBreakdownChart } from '../components/charts/SportBreakdownChart';
 import { ProjectionChart } from '../components/charts/ProjectionChart';
@@ -27,6 +27,8 @@ interface CoachViewProps {
   onDeleteFighter: (fighterId: string) => void;
   onSaveNote: (fighterId: string, title: string, content: string, sport: string, noteId?: string) => Promise<void>;
   onDeleteNote: (noteId: string) => Promise<void>;
+  onAddReply: (noteId: string, content: string) => Promise<void>;
+  onDeleteReply: (noteId: string, reply: NoteReply) => Promise<void>;
 }
 
 export function CoachView({
@@ -46,7 +48,9 @@ export function CoachView({
   onEditFighter,
   onDeleteFighter,
   onSaveNote,
-  onDeleteNote
+  onDeleteNote,
+  onAddReply,
+  onDeleteReply
 }: CoachViewProps) {
   const [selectedFighterTypeView, setSelectedFighterTypeView] = useState<FighterType | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -429,6 +433,11 @@ export function CoachView({
                     note={note}
                     isCoach={true}
                     t={t}
+                    currentUserId={user.uid}
+                    currentUserName={profile.name}
+                    currentUserRole="coach"
+                    onAddReply={onAddReply}
+                    onDeleteReply={onDeleteReply}
                     onEdit={(n) => {
                       setEditingNote(n);
                       setShowNoteEditor(true);
