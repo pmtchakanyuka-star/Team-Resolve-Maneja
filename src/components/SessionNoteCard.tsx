@@ -33,8 +33,12 @@ export function SessionNoteCard({
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
-    setIsOverflowing(el.scrollHeight > el.clientHeight);
-  }, [note.content, expanded]);
+    const check = () => setIsOverflowing(el.scrollHeight > el.clientHeight);
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    check();
+    return () => ro.disconnect();
+  }, [note.content]);
 
   const handleSendReply = async () => {
     if (!replyText.trim() || !onAddReply || sending) return;
@@ -103,8 +107,8 @@ export function SessionNoteCard({
               className="mt-1 flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
             >
               {expanded
-                ? <><ChevronUp className="w-3 h-3" /> Show less</>
-                : <><ChevronDown className="w-3 h-3" /> Show more</>}
+                ? <><ChevronUp className="w-3 h-3" /> {t.showLess || 'Show less'}</>
+                : <><ChevronDown className="w-3 h-3" /> {t.showMore || 'Show more'}</>}
             </button>
           )}
         </div>
@@ -137,8 +141,8 @@ export function SessionNoteCard({
               <div className="space-y-3 mb-4">
                 {replies.map((reply) => {
                   const canDelete = isCoach || reply.authorId === currentUserId;
-                  const replyTime = reply.createdAt?.toDate
-                    ? reply.createdAt.toDate().toLocaleString([], {
+                  const replyTime = reply.createdAt
+                    ? new Date(reply.createdAt).toLocaleString([], {
                         month: 'short', day: 'numeric',
                         hour: '2-digit', minute: '2-digit'
                       })

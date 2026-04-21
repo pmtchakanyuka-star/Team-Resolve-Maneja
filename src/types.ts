@@ -56,7 +56,7 @@ export interface NoteReply {
   authorName: string;
   role: 'coach' | 'fighter'; // master_coach users are stored as 'coach'
   content: string;
-  createdAt: any;
+  createdAt: number;
 }
 
 export interface SessionNote {
@@ -200,6 +200,8 @@ export const TRANSLATIONS = {
     noteTitle: "Session Title",
     saveNote: "Save Note",
     replyPlaceholder: "Write a reply... (Enter to send)",
+    showMore: "Show more",
+    showLess: "Show less",
     editNote: "Edit Note",
     deleteNote: "Delete Note",
     noNotesYet: "No notes yet",
@@ -354,6 +356,8 @@ export const TRANSLATIONS = {
     noteTitle: "セッションタイトル",
     saveNote: "ノートを保存",
     replyPlaceholder: "返信を入力... (Enterで送信)",
+    showMore: "もっと見る",
+    showLess: "少なく表示",
     editNote: "ノートを編集",
     deleteNote: "ノートを削除",
     noNotesYet: "ノートがまだありません",

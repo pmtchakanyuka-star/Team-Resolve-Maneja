@@ -639,7 +639,7 @@ export default function App() {
       authorName: profile.name,
       role: replyRole,
       content,
-      createdAt: serverTimestamp(),
+      createdAt: Date.now(),
     };
     try {
       await updateDoc(doc(db, 'session_notes', noteId), { replies: arrayUnion(reply) });
