@@ -54,7 +54,7 @@ export interface NoteReply {
   id: string;
   authorId: string;
   authorName: string;
-  role: 'coach' | 'fighter';
+  role: 'coach' | 'fighter'; // master_coach users are stored as 'coach'
   content: string;
   createdAt: any;
 }
