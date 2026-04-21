@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, updateEmail, type User } from 'firebase/auth';
-import { initializeFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, getDocFromServer, deleteField, limit, writeBatch, enableNetwork, disableNetwork, getDocs, type DocumentData } from 'firebase/firestore';
+import { initializeFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, getDocFromServer, deleteField, limit, writeBatch, enableNetwork, disableNetwork, getDocs, arrayUnion, type DocumentData } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
@@ -71,5 +71,5 @@ export async function testConnection() {
   }
 }
 
-export { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, updateEmail, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteField, limit, writeBatch, enableNetwork, disableNetwork, getDocs };
+export { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, updateEmail, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, deleteField, limit, writeBatch, enableNetwork, disableNetwork, getDocs, arrayUnion };
 export type { User, DocumentData };
