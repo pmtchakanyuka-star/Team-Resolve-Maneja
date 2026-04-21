@@ -34,10 +34,10 @@ export function SessionNoteCard({
     const el = contentRef.current;
     if (!el) return;
     setIsOverflowing(el.scrollHeight > el.clientHeight);
-  }, [note.content]);
+  }, [note.content, expanded]);
 
   const handleSendReply = async () => {
-    if (!replyText.trim() || !onAddReply) return;
+    if (!replyText.trim() || !onAddReply || sending) return;
     setSending(true);
     try {
       await onAddReply(note.id, replyText.trim());
