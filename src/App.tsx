@@ -34,6 +34,7 @@ import {
   enableNetwork,
   disableNetwork,
   getDocs,
+  arrayUnion,
 } from './firebase';
 import { GoogleGenAI, Type } from "@google/genai";
 import { 
@@ -68,7 +69,7 @@ import {
   Edit
 } from 'lucide-react';
 import { cn } from './lib/utils';
-import { TRANSLATIONS, Role, Language, UserProfile, WeightEntry, Camp, FighterType, Sport, SessionNote } from './types';
+import { TRANSLATIONS, Role, Language, UserProfile, WeightEntry, Camp, FighterType, Sport, SessionNote, NoteReply } from './types';
 import { CoachView } from './pages/CoachView';
 import { SessionNoteCard } from './components/SessionNoteCard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -625,6 +626,36 @@ export default function App() {
       await deleteDoc(doc(db, 'session_notes', noteId));
     } catch (err) {
       handleFirestoreError(err, OperationType.DELETE, 'session_notes');
+    }
+  };
+
+  const handleAddReply = async (noteId: string, content: string) => {
+    if (!user || !profile) return;
+    const replyRole: 'coach' | 'fighter' =
+      (profile.role === 'coach' || profile.role === 'master_coach') ? 'coach' : 'fighter';
+    const reply: NoteReply = {
+      id: crypto.randomUUID(),
+      authorId: user.uid,
+      authorName: profile.name,
+      role: replyRole,
+      content,
+      createdAt: Date.now(),
+    };
+    try {
+      await updateDoc(doc(db, 'session_notes', noteId), { replies: arrayUnion(reply) });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'session_notes');
+    }
+  };
+
+  const handleDeleteReply = async (noteId: string, reply: NoteReply) => {
+    const note = sessionNotes.find(n => n.id === noteId);
+    if (!note) return;
+    const filteredReplies = (note.replies || []).filter(r => r.id !== reply.id);
+    try {
+      await updateDoc(doc(db, 'session_notes', noteId), { replies: filteredReplies });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'session_notes');
     }
   };
 
@@ -1853,6 +1884,8 @@ export default function App() {
             onDeleteFighter={handleDeleteFighter}
             onSaveNote={handleSaveNote}
             onDeleteNote={handleDeleteNote}
+            onAddReply={handleAddReply}
+            onDeleteReply={handleDeleteReply}
           />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -2000,15 +2033,20 @@ export default function App() {
 
             {/* Dashboard Section */}
             <div className="lg:col-span-2">
-              <DashboardView 
+              <DashboardView
                 key={user.uid}
-                entries={entries} 
-                chartData={chartData} 
-                t={t} 
-                profile={profile} 
+                entries={entries}
+                chartData={chartData}
+                t={t}
+                profile={profile}
                 isCoach={false}
                 activeCamp={activeCamp}
                 sessionNotes={sessionNotes}
+                currentUserId={user.uid}
+                currentUserName={profile?.name || ''}
+                currentUserRole="fighter"
+                onAddReply={handleAddReply}
+                onDeleteReply={handleDeleteReply}
                 onEdit={(entry) => {
                   setMorningWeight(entry.morningWeight?.toString() || '');
                   setEveningWeight(entry.eveningWeight?.toString() || '');
@@ -2456,16 +2494,21 @@ function BulkEntry({ uid, t, onClose, existingEntries = [] }: { uid: string, t: 
   );
 }
 
-function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, onEdit, activeCamp, sessionNotes }: { 
-  entries: WeightEntry[], 
-  chartData: any[], 
-  t: any, 
+function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, onEdit, activeCamp, sessionNotes, currentUserId, currentUserName, currentUserRole, onAddReply, onDeleteReply }: {
+  entries: WeightEntry[],
+  chartData: any[],
+  t: any,
   profile: UserProfile | null,
   isCoach?: boolean,
   onUpdatePlan?: (field: string, value: string) => void,
   onEdit?: (entry: WeightEntry) => void,
   activeCamp?: Camp | null,
-  sessionNotes: SessionNote[]
+  sessionNotes: SessionNote[],
+  currentUserId?: string,
+  currentUserName?: string,
+  currentUserRole?: 'coach' | 'fighter',
+  onAddReply?: (noteId: string, content: string) => Promise<void>,
+  onDeleteReply?: (noteId: string, reply: NoteReply) => Promise<void>,
 }) {
   const [activeTab, setActiveTab] = useState<'stats' | 'notes'>('stats');
   const latestEntry = entries[entries.length - 1];
@@ -2911,6 +2954,11 @@ function DashboardView({ entries, chartData, t, profile, isCoach, onUpdatePlan, 
                 note={note}
                 isCoach={false}
                 t={t}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                currentUserRole={currentUserRole}
+                onAddReply={onAddReply}
+                onDeleteReply={onDeleteReply}
               />
             ))
           ) : (
